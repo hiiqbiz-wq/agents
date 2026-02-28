@@ -1,0 +1,16 @@
+rules:
+  - id: hardcoded-jwt-secret
+    pattern: jwt.encode($DATA, "...", ...)
+    message: JWT secret should not be hardcoded
+    severity: ERROR
+    languages:
+      - python
+      - javascript
+      - go
+  - id: use-of-eval
+    pattern: eval(...)
+    message: Avoid using eval() as it can lead to code injection vulnerabilities
+    severity: WARNING
+    languages:
+      - python
+      - javascript

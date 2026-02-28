@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profile>
+  <name>Security Focused Profile</name>
+  <language>py</language>
+  <rules>
+    <rule>
+      <repositoryKey>python</repositoryKey>
+      <key>S108</key>
+      <priority>MAJOR</priority>
+    </rule>
+    <rule>
+      <repositoryKey>python</repositoryKey>
+      <key>S1192</key>
+      <priority>MINOR</priority>
+    </rule>
+  </rules>
+</profile>
