@@ -175,6 +175,9 @@ postgresql:
 
 redis:
   enabled: false
+  auth:
+    enabled: true
+    password: changeme
 ```
 
 **Reference:** See `assets/values.yaml.template` for complete structure
