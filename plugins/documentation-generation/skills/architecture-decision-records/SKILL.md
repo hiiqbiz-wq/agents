@@ -143,7 +143,6 @@ additional services (no separate Elasticsearch needed).
 
 ## Related Decisions
 
-- ADR-0002: Caching Strategy (Redis) - complements database choice
 - ADR-0005: Search Architecture - may supersede if Elasticsearch needed
 
 ## References
@@ -334,7 +333,6 @@ docs/
 │   ├── README.md           # Index and guidelines
 │   ├── template.md         # Team's ADR template
 │   ├── 0001-use-postgresql.md
-│   ├── 0002-caching-strategy.md
 │   ├── 0003-mongodb-user-profiles.md  # [DEPRECATED]
 │   └── 0020-deprecate-mongodb.md      # Supersedes 0003
 ```
@@ -351,7 +349,6 @@ This directory contains Architecture Decision Records (ADRs) for [Project Name].
 | ADR                                   | Title                              | Status     | Date       |
 | ------------------------------------- | ---------------------------------- | ---------- | ---------- |
 | [0001](0001-use-postgresql.md)        | Use PostgreSQL as Primary Database | Accepted   | 2024-01-10 |
-| [0002](0002-caching-strategy.md)      | Caching Strategy with Redis        | Accepted   | 2024-01-12 |
 | [0003](0003-mongodb-user-profiles.md) | MongoDB for User Profiles          | Deprecated | 2023-06-15 |
 | [0020](0020-deprecate-mongodb.md)     | Deprecate MongoDB                  | Accepted   | 2024-01-15 |
 
