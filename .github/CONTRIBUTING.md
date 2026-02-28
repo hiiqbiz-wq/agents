@@ -4,7 +4,7 @@ Thank you for your interest in contributing to this collection of Claude Code su
 
 ## Before You Contribute
 
-1. **Read our [Code of Conduct](.github/CODE_OF_CONDUCT.md)** - All interactions must follow our community standards
+1. **Read our [Code of Conduct](CODE_OF_CONDUCT.md)** - All interactions must follow our community standards
 2. **Search existing issues** - Check if your suggestion or bug report already exists
 3. **Use appropriate templates** - Follow the provided issue and PR templates
 
