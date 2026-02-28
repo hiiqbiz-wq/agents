@@ -172,9 +172,12 @@ postgresql:
   auth:
     database: myapp
     username: myapp
+    # password: "" # Set via Secret in production
 
 redis:
   enabled: false
+  auth:
+    enabled: true
 ```
 
 **Reference:** See `assets/values.yaml.template` for complete structure
@@ -294,7 +297,7 @@ postgresql:
   auth:
     database: myapp
     username: myapp
-    password: changeme
+    # password: "" # Set via Secret in production
   primary:
     persistence:
       enabled: true

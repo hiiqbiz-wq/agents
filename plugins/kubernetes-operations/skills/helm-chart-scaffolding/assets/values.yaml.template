@@ -153,7 +153,7 @@ postgresql:
   auth:
     database: myapp
     username: myapp
-    password: changeme
+    # password: "" # Set via Secret in production
   primary:
     persistence:
       enabled: true
@@ -163,7 +163,8 @@ postgresql:
 redis:
   enabled: false
   auth:
-    enabled: false
+    enabled: true
+    # password: "" # Set via Secret in production
   master:
     persistence:
       enabled: false

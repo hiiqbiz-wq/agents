@@ -211,8 +211,8 @@ metadata:
   namespace: <namespace>
 type: Opaque
 stringData:
-  DATABASE_PASSWORD: "changeme"
-  API_KEY: "secret-api-key"
+  DATABASE_PASSWORD: "<your-secure-password>"
+  API_KEY: "<your-secret-api-key>"
   # For certificate files
   tls.crt: |
     -----BEGIN CERTIFICATE-----
