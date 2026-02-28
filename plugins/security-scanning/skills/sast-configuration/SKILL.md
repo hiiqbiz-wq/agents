@@ -69,9 +69,9 @@ codeql database create mydb --language=python
 
 ## Reference Documentation
 
-- [Semgrep Rule Creation](references/semgrep-rules.md) - Pattern-based security rule development
-- [SonarQube Configuration](references/sonarqube-config.md) - Quality gates and profiles
-- [CodeQL Setup Guide](references/codeql-setup.md) - Query development and workflows
+- [Semgrep Rule Creation](https://semgrep.dev/docs/writing-rules/) - Pattern-based security rule development
+- [SonarQube Configuration](https://docs.sonarsource.com/sonarqube/latest/) - Quality gates and profiles
+- [CodeQL Setup Guide](https://docs.github.com/en/code-security/codeql-cli/) - Query development and workflows
 
 ## Templates & Assets
 
@@ -142,7 +142,7 @@ codeql database create mydb --language=python
 ### Custom Rule Development
 
 ```yaml
-# See references/semgrep-rules.md for detailed examples
+# See official documentation for detailed examples: https://semgrep.dev/docs/writing-rules/
 rules:
   - id: hardcoded-jwt-secret
     pattern: jwt.encode($DATA, "...", ...)
