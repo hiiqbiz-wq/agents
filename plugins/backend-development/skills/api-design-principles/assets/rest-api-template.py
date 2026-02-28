@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional, List, Any
 from datetime import datetime
 from enum import Enum
+import os
 
 app = FastAPI(
     title="API Template",
@@ -20,9 +21,10 @@ app = FastAPI(
 
 # Security Middleware
 # Trusted Host: Prevents HTTP Host Header attacks
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"] # TODO: Configure this in production, e.g. ["api.example.com"]
+    allowed_hosts=ALLOWED_HOSTS
 )
 
 # CORS: Configures Cross-Origin Resource Sharing
