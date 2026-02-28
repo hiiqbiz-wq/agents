@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
+DEFAULT_MAX_ITERATIONS = 5
+
 
 @dataclass
 class TestCase:
@@ -101,7 +103,7 @@ class PromptOptimizer:
         overlap = len(response_words & expected_words)
         return overlap / len(expected_words)
 
-    def optimize(self, base_prompt: str, max_iterations: int = 5) -> Dict[str, Any]:
+    def optimize(self, base_prompt: str, max_iterations: int = DEFAULT_MAX_ITERATIONS) -> Dict[str, Any]:
         """Iteratively optimize a prompt."""
         current_prompt = base_prompt
         best_prompt = base_prompt
