@@ -349,4 +349,4 @@ To add a new agent:
 3. Write comprehensive system prompt
 4. Update plugin definition in `.claude-plugin/marketplace.json`
 
-See [Contributing Guide](../CONTRIBUTING.md) for details.
+See [Contributing Guide](../.github/CONTRIBUTING.md) for details.
