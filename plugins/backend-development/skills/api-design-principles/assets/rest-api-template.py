@@ -27,18 +27,23 @@ app.add_middleware(
 )
 
 # CORS: Configures Cross-Origin Resource Sharing
-# Get allowed origins from environment variable, fallback to local development defaults
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:8000"
-).split(",")
+# Get allowed origins from environment variable (comma-separated), fallback to local development defaults
+# Example: ALLOWED_ORIGINS="http://localhost:3000,https://app.example.com"
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:8000"
+    ).split(",")
+    if origin.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True, # Often needed for cookies/auth headers, requires specific origins
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,  # Safer default; set to True only when you need cookies/auth headers, have strict origins, and restrict methods/headers
+    allow_methods=["*"],  # TODO: Restrict to specific methods (e.g. ["GET","POST"]) for tighter security
+    allow_headers=["*"],  # TODO: Restrict to specific headers for tighter security
 )
 
 # Models
