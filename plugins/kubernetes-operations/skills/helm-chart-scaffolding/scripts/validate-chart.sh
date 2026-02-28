@@ -94,21 +94,22 @@ echo ""
 
 # 4. Test template rendering
 echo "4️⃣  Testing template rendering..."
-if helm template "$RELEASE_NAME" "$CHART_DIR" > /dev/null 2>&1; then
+if OUTPUT=$(helm template "$RELEASE_NAME" "$CHART_DIR" 2>&1); then
     success "Templates rendered successfully"
 else
     error "Template rendering failed"
-    helm template "$RELEASE_NAME" "$CHART_DIR"
+    echo "$OUTPUT"
     exit 1
 fi
 echo ""
 
 # 5. Dry-run installation
 echo "5️⃣  Testing dry-run installation..."
-if helm install "$RELEASE_NAME" "$CHART_DIR" --dry-run --debug > /dev/null 2>&1; then
+if OUTPUT=$(helm install "$RELEASE_NAME" "$CHART_DIR" --dry-run --debug 2>&1); then
     success "Dry-run installation successful"
 else
     error "Dry-run installation failed"
+    echo "$OUTPUT"
     exit 1
 fi
 echo ""
