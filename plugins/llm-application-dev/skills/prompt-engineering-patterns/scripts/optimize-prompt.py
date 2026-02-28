@@ -10,7 +10,26 @@ import time
 from typing import List, Dict, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
-import numpy as np
+import statistics
+
+
+def _calculate_percentile(data: List[float], p: float) -> float:
+    """Calculate the p-th percentile of a list of numbers."""
+    if not data:
+        return 0.0
+    data_sorted = sorted(data)
+    n = len(data_sorted)
+    if n == 1:
+        return data_sorted[0]
+
+    k = (n - 1) * (p / 100.0)
+    f = int(k)
+    c = min(f + 1, n - 1)
+
+    if f == c:
+        return data_sorted[f]
+
+    return data_sorted[f] * (c - k) + data_sorted[c] * (k - f)
 
 
 @dataclass
@@ -78,11 +97,11 @@ class PromptOptimizer:
             metrics['accuracy'].append(result['accuracy'])
 
         return {
-            'avg_accuracy': np.mean(metrics['accuracy']),
-            'avg_latency': np.mean(metrics['latency']),
-            'p95_latency': np.percentile(metrics['latency'], 95),
-            'avg_tokens': np.mean(metrics['token_count']),
-            'success_rate': np.mean(metrics['success_rate'])
+            'avg_accuracy': statistics.mean(metrics['accuracy']) if metrics['accuracy'] else 0.0,
+            'avg_latency': statistics.mean(metrics['latency']) if metrics['latency'] else 0.0,
+            'p95_latency': _calculate_percentile(metrics['latency'], 95),
+            'avg_tokens': statistics.mean(metrics['token_count']) if metrics['token_count'] else 0.0,
+            'success_rate': statistics.mean(metrics['success_rate']) if metrics['success_rate'] else 0.0
         }
 
     def calculate_accuracy(self, response: str, expected: str) -> float:
