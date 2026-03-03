@@ -7,6 +7,7 @@ Automatically test and optimize prompts using A/B testing and metrics tracking.
 
 import json
 import time
+import threading
 from typing import List, Dict, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
@@ -26,6 +27,8 @@ class PromptOptimizer:
         self.test_suite = test_suite
         self.results_history = []
         self.executor = ThreadPoolExecutor()
+        self._cache = {}
+        self._cache_lock = threading.Lock()
 
     def shutdown(self):
         """Shutdown the thread pool executor."""
@@ -49,23 +52,31 @@ class PromptOptimizer:
             # Render prompt with test case inputs
             prompt = prompt_template.format(**test_case.input)
 
-            # Get LLM response
-            response = self.client.complete(prompt)
+            # Check cache for identical prompt
+            cached_response = None
+            with self._cache_lock:
+                if prompt in self._cache:
+                    cached_response = self._cache[prompt]
 
-            # Measure latency
-            latency = time.time() - start_time
+            if cached_response is not None:
+                response = cached_response
+                latency = 0.0  # Cached response has near-zero latency
+            else:
+                # Get LLM response
+                response = self.client.complete(prompt)
+                latency = time.time() - start_time
 
-            # Calculate individual metrics
-            token_count = len(prompt.split()) + len(response.split())
-            success = 1 if response else 0
-            accuracy = self.calculate_accuracy(response, test_case.expected_output)
+                # Cache the response
+                with self._cache_lock:
+                    self._cache[prompt] = response
 
             return {
                 'latency': latency,
-                'token_count': token_count,
-                'success_rate': success,
-                'accuracy': accuracy
+                'token_count': len(prompt.split()) + len(response.split()),
+                'success_rate': 1 if response else 0,
+                'accuracy': self.calculate_accuracy(response, test_case.expected_output)
             }
+
 
         # Run test cases in parallel
         results = list(self.executor.map(process_test_case, test_cases))
