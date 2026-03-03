@@ -2,7 +2,7 @@
 set -e
 
 CHART_DIR="${1:-.}"
-RELEASE_NAME="test-release"
+RELEASE_NAME="${2:-${RELEASE_NAME:-test-release}}"
 
 echo "═══════════════════════════════════════════════════════"
 echo "  Helm Chart Validation"
