@@ -21,9 +21,10 @@ app = FastAPI(
 
 # Security Middleware
 # Trusted Host: Prevents HTTP Host Header attacks
+# Configure allowed hosts via environment variable, fallback to local development defaults
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"] # TODO: Configure this in production, e.g. ["api.example.com"]
+    allowed_hosts=[h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")]
 )
 
 # CORS: Configures Cross-Origin Resource Sharing
