@@ -111,8 +111,6 @@ class PromptOptimizer:
         for iteration in range(max_iterations):
             print(f"\nIteration {iteration + 1}/{max_iterations}")
 
-            # Evaluate current prompt
-            # Bolt Optimization: Avoid re-evaluating if we already have metrics from previous iteration
             if current_metrics:
                 metrics = current_metrics
             else:
