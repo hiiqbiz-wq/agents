@@ -20,19 +20,19 @@ app = FastAPI(title="API Template", version="1.0.0", docs_url="/api/docs")
 # Trusted Host: Prevents HTTP Host Header attacks
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"],  # TODO: Configure this in production, e.g. ["api.example.com"]
+    allowed_hosts=[h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")],  # TODO: Configure this in production, e.g. ["api.example.com"]
 )
 
 # CORS: Configures Cross-Origin Resource Sharing
 # Get allowed origins from environment variable, fallback to local development defaults
-allowed_origins = os.getenv(
+allowed_origins = [h.strip() for h in os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:3000,http://localhost:8000"
-).split(",")
+).split(",")]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Update this with specific origins in production
+    allow_origins=allowed_origins,  # TODO: Update this with specific origins in production
     allow_credentials=False,  # TODO: Set to True if you need cookies/auth headers, but restrict origins
     allow_methods=["*"],
     allow_headers=["*"],
@@ -231,4 +231,6 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host = os.getenv("API_HOST", "127.0.0.1")
+    port = int(os.getenv("API_PORT", "8000"))
+    uvicorn.run(app, host=host, port=port)
