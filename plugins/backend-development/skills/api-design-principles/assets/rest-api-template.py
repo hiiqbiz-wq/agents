@@ -18,24 +18,45 @@ app = FastAPI(title="API Template", version="1.0.0", docs_url="/api/docs")
 
 # Security Middleware
 # Trusted Host: Prevents HTTP Host Header attacks
+allowed_hosts = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+]
+
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"],  # TODO: Configure this in production, e.g. ["api.example.com"]
+    allowed_hosts=allowed_hosts,
 )
 
 # CORS: Configures Cross-Origin Resource Sharing
 # Get allowed origins from environment variable, fallback to local development defaults
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:8000"
-).split(",")
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000"
+    ).split(",")
+]
+
+allowed_methods = [
+    method.strip()
+    for method in os.getenv(
+        "ALLOWED_METHODS", "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    ).split(",")
+]
+
+allowed_headers = [
+    header.strip()
+    for header in os.getenv(
+        "ALLOWED_HEADERS", "Content-Type,Authorization,Accept"
+    ).split(",")
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Update this with specific origins in production
+    allow_origins=allowed_origins,
     allow_credentials=False,  # TODO: Set to True if you need cookies/auth headers, but restrict origins
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=allowed_methods,
+    allow_headers=allowed_headers,
 )
 
 # Security Schemes
