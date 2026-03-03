@@ -3,6 +3,7 @@ Production-ready REST API template using FastAPI.
 Includes pagination, filtering, error handling, and best practices.
 """
 
+import os
 from fastapi import FastAPI, HTTPException, Query, Path, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -23,6 +24,12 @@ app.add_middleware(
 )
 
 # CORS: Configures Cross-Origin Resource Sharing
+# Get allowed origins from environment variable, fallback to local development defaults
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://localhost:8000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # TODO: Update this with specific origins in production
