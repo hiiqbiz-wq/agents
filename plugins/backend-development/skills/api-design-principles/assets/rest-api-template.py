@@ -139,16 +139,17 @@ async def list_users(
     """List users with pagination and filtering."""
     # Mock implementation
     total = 100
+    now = datetime.now()
     items = [
-        User(
-            id=str(i),
-            email=f"user{i}@example.com",
-            name=f"User {i}",
-            status=UserStatus.ACTIVE,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
-        ).model_dump()
-        for i in range((page - 1) * page_size, min(page * page_size, total))
+        {
+            "id": str(i),
+            "email": f"user{i}@example.com",
+            "name": f"User {i}",
+            "status": UserStatus.ACTIVE,
+            "created_at": now,
+            "updated_at": now
+        }
+        for i in range((page-1)*page_size, min(page*page_size, total))
     ]
 
     return PaginatedResponse(
