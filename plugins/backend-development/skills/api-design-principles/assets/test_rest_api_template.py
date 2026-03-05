@@ -11,7 +11,7 @@ rest_api_template = importlib.util.module_from_spec(spec)
 sys.modules["rest_api_template"] = rest_api_template
 spec.loader.exec_module(rest_api_template)
 
-client = TestClient(rest_api_template.app)
+client = TestClient(rest_api_template.app, base_url="http://localhost")
 
 def test_get_user_not_found():
     response = client.get("/api/users/999", headers={"Authorization": "Bearer fake-token"})

@@ -26,7 +26,7 @@ async def mock_get_current_user():
 
 app.dependency_overrides[rest_api_template.get_current_user] = mock_get_current_user
 
-client = TestClient(app)
+client = TestClient(app, base_url="http://localhost")
 
 
 def test_list_users_default_pagination():
@@ -66,3 +66,22 @@ def test_list_users_filter_status():
     # The template just returns everything based on calculation for mock but parameter gets parsed
     assert data["items"][0]["id"] == "0"
     assert data["items"][0]["status"] == "active"
+
+
+def test_cors_no_wildcard_origins():
+    """CORS is not configured with a wildcard allow-all origin."""
+    assert "*" not in rest_api_template.allowed_origins
+
+
+def test_cors_allowed_origin_returns_header():
+    """CORS response header is returned for a configured allowed origin."""
+    response = client.get("/api/users", headers={"Origin": "http://localhost:3000"})
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+
+def test_cors_untrusted_origin_blocked():
+    """CORS header is not returned for an untrusted origin."""
+    response = client.get("/api/users", headers={"Origin": "https://evil.example.com"})
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") is None
