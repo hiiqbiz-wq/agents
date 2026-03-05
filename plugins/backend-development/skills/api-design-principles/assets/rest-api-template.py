@@ -16,6 +16,9 @@ from enum import Enum
 
 app = FastAPI(title="API Template", version="1.0.0", docs_url="/api/docs")
 
+# Bind address: localhost by default; override with BIND_HOST env var for container deployments
+BIND_HOST = os.getenv("BIND_HOST", "127.0.0.1")
+
 # Security Middleware
 # Trusted Host: Prevents HTTP Host Header attacks
 # Get allowed hosts from environment variable; fallback to safe localhost defaults for development
@@ -243,4 +246,4 @@ async def delete_user(user_id: str, current_user: str = Depends(get_current_user
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=BIND_HOST, port=8000)

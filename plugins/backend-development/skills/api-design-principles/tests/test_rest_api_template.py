@@ -55,6 +55,40 @@ def test_list_users_custom_pagination():
     assert data["items"][9]["id"] == "19"
 
 
+def _load_module_with_env(env_vars):
+    """Helper to load the rest-api-template module with specific env vars."""
+    old_env = {}
+    for key, value in env_vars.items():
+        old_env[key] = os.environ.get(key)
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = value
+    try:
+        spec = importlib.util.spec_from_file_location("_rest_api_template_tmp", target_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        for key, original in old_env.items():
+            if original is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = original
+
+
+def test_bind_host_default():
+    """Verify BIND_HOST defaults to 127.0.0.1 when env var is not set."""
+    module = _load_module_with_env({"BIND_HOST": None})
+    assert module.BIND_HOST == "127.0.0.1"
+
+
+def test_bind_host_env_override():
+    """Verify BIND_HOST can be overridden via environment variable."""
+    module = _load_module_with_env({"BIND_HOST": "0.0.0.0"})
+    assert module.BIND_HOST == "0.0.0.0"
+
+
 def test_list_users_filter_status():
     # Test that the status query parameter is handled correctly
     response = client.get("/api/users?status=active&page=1&page_size=5")
