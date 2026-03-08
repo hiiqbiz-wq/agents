@@ -293,12 +293,13 @@ function calculateDiscount(price, discountPercent) {
 // After (fixed code with validation)
 function calculateDiscount(price, discountPercent) {
   // Validate inputs
-  if (typeof price !== "number" || price < 0) {
+  if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
     throw new Error("Invalid price");
   }
 
   if (
     typeof discountPercent !== "number" ||
+    !Number.isFinite(discountPercent) ||
     discountPercent < 0 ||
     discountPercent > 100
   ) {
