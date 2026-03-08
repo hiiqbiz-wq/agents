@@ -6,6 +6,7 @@ Automatically test and optimize prompts using A/B testing and metrics tracking.
 """
 
 import time
+import re
 from typing import List, Dict, Any
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
@@ -20,6 +21,14 @@ class TestCase:
 
 
 class PromptOptimizer:
+    _CONCISE_REPLACEMENTS = {
+        "in order to": "to",
+        "due to the fact that": "because",
+        "at this point in time": "now",
+        "in the event that": "if",
+    }
+    _CONCISE_PATTERN = re.compile("|".join(re.escape(k) for k in _CONCISE_REPLACEMENTS.keys()))
+
     def __init__(self, llm_client, test_suite: List[TestCase]):
         self.client = llm_client
         self.test_suite = test_suite
@@ -186,18 +195,10 @@ class PromptOptimizer:
 
     def make_concise(self, prompt: str) -> str:
         """Remove redundant words to make prompt more concise."""
-        replacements = [
-            ("in order to", "to"),
-            ("due to the fact that", "because"),
-            ("at this point in time", "now"),
-            ("in the event that", "if"),
-        ]
-
-        result = prompt
-        for old, new in replacements:
-            result = result.replace(old, new)
-
-        return result
+        return self._CONCISE_PATTERN.sub(
+            lambda m: self._CONCISE_REPLACEMENTS[m.group(0)],
+            prompt
+        )
 
     def add_examples(self, prompt: str) -> str:
         """Add example section to prompt."""
