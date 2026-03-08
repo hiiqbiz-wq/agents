@@ -33,15 +33,19 @@ app.add_middleware(
 
 # CORS: Configures Cross-Origin Resource Sharing
 # Get allowed origins from environment variable, fallback to local development defaults
-allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:8000"
-).split(",")
+raw_allowed_origins = os.getenv("ALLOWED_ORIGINS")
+if raw_allowed_origins:
+    allowed_origins = [
+        origin.strip() for origin in raw_allowed_origins.split(",") if origin.strip()
+    ]
+else:
+    # Safe defaults for local development; production should set ALLOWED_ORIGINS explicitly
+    allowed_origins = ["http://localhost:3000", "http://localhost:8000"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Update this with specific origins in production
-    allow_credentials=False,  # TODO: Set to True if you need cookies/auth headers, but restrict origins
+    allow_origins=allowed_origins,
+    allow_credentials=False,  # Set to True if you need cookies/auth headers, but restrict origins
     allow_methods=["*"],
     allow_headers=["*"],
 )
