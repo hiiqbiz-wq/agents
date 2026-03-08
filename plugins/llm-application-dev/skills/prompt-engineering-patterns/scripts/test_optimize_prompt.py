@@ -4,6 +4,11 @@ import sys
 import os
 from unittest.mock import MagicMock
 
+# Mock numpy before importing the script that depends on it
+mock_np = MagicMock()
+mock_np.bool_ = bool
+sys.modules["numpy"] = mock_np
+
 # Dynamically import the script because of the hyphen in the filename
 script_path = os.path.join(os.path.dirname(__file__), 'optimize-prompt.py')
 spec = importlib.util.spec_from_file_location("optimize_prompt", script_path)
@@ -55,3 +60,13 @@ def test_calculate_accuracy_duplicate_words(optimizer):
     # expected: "a a b", set("a", "b"). len = 2.
     # response: "a c c", set("a", "c"). overlap = 1 ("a"). score = 1/2 = 0.5.
     assert optimizer.calculate_accuracy("a c c", "a a b") == 0.5
+
+def test_add_examples(optimizer):
+    prompt = "Identify the topic of this article:"
+    expected = (
+        "Identify the topic of this article:\n\n"
+        "Example:\n"
+        "Input: Sample input\n"
+        "Output: Sample output\n"
+    )
+    assert optimizer.add_examples(prompt) == expected
