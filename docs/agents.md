@@ -106,7 +106,7 @@ Complete reference for all **100 specialized AI agents** organized by category w
 
 | Agent                                                             | Model | Description                                                                          |
 | ----------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------ |
-| [conductor-validator](../conductor/agents/conductor-validator.md) | opus  | Validates Conductor project artifacts for completeness, consistency, and correctness |
+| [conductor-validator](../plugins/conductor/agents/conductor-validator.md) | opus  | Validates Conductor project artifacts for completeness, consistency, and correctness |
 
 ### Quality Assurance & Security
 
@@ -349,4 +349,4 @@ To add a new agent:
 3. Write comprehensive system prompt
 4. Update plugin definition in `.claude-plugin/marketplace.json`
 
-See [Contributing Guide](../CONTRIBUTING.md) for details.
+See [Contributing Guide](../.github/CONTRIBUTING.md) for details.
