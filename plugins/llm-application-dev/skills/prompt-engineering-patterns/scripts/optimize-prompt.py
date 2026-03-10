@@ -5,7 +5,6 @@ Prompt Optimization Script
 Automatically test and optimize prompts using A/B testing and metrics tracking.
 """
 
-import json
 import time
 from typing import List, Dict, Any
 from dataclasses import dataclass
@@ -226,6 +225,7 @@ Output: Sample output
 
     def export_results(self, filename: str):
         """Export optimization results to JSON."""
+        import json
         with open(filename, 'w') as f:
             json.dump(self.results_history, f, indent=2)
 

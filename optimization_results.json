@@ -1,0 +1,13 @@
+[
+  {
+    "iteration": 0,
+    "prompt": "Classify the sentiment of: {text}\nSentiment:",
+    "metrics": {
+      "avg_accuracy": 0.96,
+      "avg_latency": 0.96,
+      "p95_latency": 0.5,
+      "avg_tokens": 0.96,
+      "success_rate": 0.96
+    }
+  }
+]
