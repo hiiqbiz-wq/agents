@@ -1,7 +1,16 @@
 import pytest
 from pydantic import ValidationError
-from .rest_api_template import UserCreate, UserStatus
+import importlib.util
+from pathlib import Path
 
+_rest_api_template_path = Path(__file__).with_name("rest-api-template.py")
+_spec = importlib.util.spec_from_file_location("rest_api_template", _rest_api_template_path)
+_rest_api_template = importlib.util.module_from_spec(_spec)
+assert _spec is not None and _spec.loader is not None
+_spec.loader.exec_module(_rest_api_template)  # type: ignore[attr-defined]
+
+UserCreate = _rest_api_template.UserCreate
+UserStatus = _rest_api_template.UserStatus
 def test_user_create_valid():
     """Test UserCreate with valid data."""
     user_data = {
