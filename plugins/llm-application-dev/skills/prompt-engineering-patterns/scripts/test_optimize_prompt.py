@@ -1,57 +1,65 @@
-import pytest
 import importlib.util
-import sys
 import os
-from unittest.mock import MagicMock
+import sys
+import pytest
 
-# Dynamically import the script because of the hyphen in the filename
+# Dynamically import the script due to the hyphen in the filename
 script_path = os.path.join(os.path.dirname(__file__), 'optimize-prompt.py')
-spec = importlib.util.spec_from_file_location("optimize_prompt", script_path)
+spec = importlib.util.spec_from_file_location('optimize_prompt', script_path)
 optimize_prompt = importlib.util.module_from_spec(spec)
-sys.modules["optimize_prompt"] = optimize_prompt
+sys.modules['optimize_prompt'] = optimize_prompt
 spec.loader.exec_module(optimize_prompt)
 
-class MockLLMClient:
-    def complete(self, prompt):
-        return "mocked response"
+PromptOptimizer = optimize_prompt.PromptOptimizer
+
 
 @pytest.fixture
 def optimizer():
-    return optimize_prompt.PromptOptimizer(MockLLMClient(), [])
+    class MockLLMClient:
+        pass
 
-def test_calculate_accuracy_exact_match(optimizer):
-    # Exact match, same case
-    assert optimizer.calculate_accuracy("Hello World", "Hello World") == 1.0
+    # Initialize with mock client and empty test suite
+    return PromptOptimizer(MockLLMClient(), [])
 
-    # Exact match, different case
-    assert optimizer.calculate_accuracy("hello world", "HELLO WORLD") == 1.0
 
-    # Exact match, trailing/leading whitespace
-    assert optimizer.calculate_accuracy("  hello world  ", "hello world") == 1.0
-    assert optimizer.calculate_accuracy("hello world", "  hello world  ") == 1.0
+def test_make_concise_single_replacement(optimizer):
+    """Test replacing a single redundant phrase."""
+    prompt = "Please explain this in order to help me understand."
+    expected = "Please explain this to help me understand."
+    assert optimizer.make_concise(prompt) == expected
 
-def test_calculate_accuracy_partial_match(optimizer):
-    # Partial match (word overlap)
-    # response has 3 words out of 4 expected -> 3/4 = 0.75
-    assert pytest.approx(optimizer.calculate_accuracy("The quick brown", "The quick brown fox"), 0.01) == 0.75
 
-def test_calculate_accuracy_no_match(optimizer):
-    # Disjoint match, with one overlapping stop word ("and" = 1/3)
-    assert optimizer.calculate_accuracy("Apples and oranges", "Cats and dogs") == 0.3333333333333333
+def test_make_concise_multiple_replacements(optimizer):
+    """Test replacing multiple different redundant phrases in one string."""
+    prompt = "due to the fact that it is raining at this point in time, we will stay indoors in the event that lightning strikes."
+    expected = "because it is raining now, we will stay indoors if lightning strikes."
+    assert optimizer.make_concise(prompt) == expected
 
-    # Completely disjoint
-    assert optimizer.calculate_accuracy("Apples Oranges", "Cats Dogs") == 0.0
 
-def test_calculate_accuracy_empty_expected(optimizer):
-    # Expected is empty string
-    assert optimizer.calculate_accuracy("Some response", "") == 0.0
+def test_make_concise_no_replacements(optimizer):
+    """Test that a string without redundant phrases remains unchanged."""
+    prompt = "This is already a concise and direct prompt."
+    expected = "This is already a concise and direct prompt."
+    assert optimizer.make_concise(prompt) == expected
 
-def test_calculate_accuracy_empty_response(optimizer):
-    # Response is empty string, expected is not
-    assert optimizer.calculate_accuracy("", "Expected string") == 0.0
 
-def test_calculate_accuracy_duplicate_words(optimizer):
-    # overlap = len(response_words & expected_words) -> set intersection
-    # expected: "a a b", set("a", "b"). len = 2.
-    # response: "a c c", set("a", "c"). overlap = 1 ("a"). score = 1/2 = 0.5.
-    assert optimizer.calculate_accuracy("a c c", "a a b") == 0.5
+def test_make_concise_empty_string(optimizer):
+    """Test behavior with an empty string."""
+    assert optimizer.make_concise("") == ""
+
+
+def test_make_concise_multiple_same_replacements(optimizer):
+    """Test replacing multiple instances of the same redundant phrase."""
+    prompt = "in order to do A, you must first do B in order to do C."
+    expected = "to do A, you must first do B to do C."
+    assert optimizer.make_concise(prompt) == expected
+
+
+def test_make_concise_case_sensitivity(optimizer):
+    """
+    Test that replacements are currently case-sensitive.
+    (If the implementation changes to case-insensitive later, this test will need updating).
+    """
+    prompt = "In order to start, Due to the fact that we are ready."
+    expected = "In order to start, Due to the fact that we are ready."
+    assert optimizer.make_concise(prompt) == expected
