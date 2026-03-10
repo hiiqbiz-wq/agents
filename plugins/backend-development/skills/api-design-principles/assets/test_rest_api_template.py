@@ -1,100 +1,122 @@
 import pytest
-from pydantic import ValidationError
+from fastapi.testclient import TestClient
 import importlib.util
-from pathlib import Path
+import sys
+import os
 
-_rest_api_template_path = Path(__file__).with_name("rest-api-template.py")
-_spec = importlib.util.spec_from_file_location("rest_api_template", _rest_api_template_path)
-_rest_api_template = importlib.util.module_from_spec(_spec)
-assert _spec is not None and _spec.loader is not None
-_spec.loader.exec_module(_rest_api_template)  # type: ignore[attr-defined]
+# Import the module dynamically since it has dashes in its name
+module_name = "rest_api_template"
+file_path = os.path.join(os.path.dirname(__file__), "rest-api-template.py")
 
-UserCreate = _rest_api_template.UserCreate
-UserStatus = _rest_api_template.UserStatus
-def test_user_create_valid():
-    """Test UserCreate with valid data."""
-    user_data = {
+spec = importlib.util.spec_from_file_location(module_name, file_path)
+rest_api_template = importlib.util.module_from_spec(spec)
+sys.modules[module_name] = rest_api_template
+spec.loader.exec_module(rest_api_template)
+
+app = rest_api_template.app
+
+client = TestClient(app)
+
+def test_read_docs():
+    response = client.get("/api/docs")
+    assert response.status_code == 200
+
+def test_list_users_default_pagination():
+    response = client.get("/api/users")
+    assert response.status_code == 200
+    data = response.json()
+    assert "items" in data
+    assert "total" in data
+    assert "page" in data
+    assert "page_size" in data
+    assert "pages" in data
+    assert data["page"] == 1
+    assert data["page_size"] == 20
+    assert len(data["items"]) <= 20
+
+def test_list_users_custom_pagination():
+    response = client.get("/api/users?page=2&page_size=10")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["page"] == 2
+    assert data["page_size"] == 10
+    assert len(data["items"]) <= 10
+
+def test_list_users_invalid_pagination():
+    response = client.get("/api/users?page=0")
+    assert response.status_code == 422
+
+def test_create_user_success():
+    payload = {
         "email": "test@example.com",
         "name": "Test User",
-        "password": "password123",
-        "status": UserStatus.ACTIVE
+        "status": "active",
+        "password": "strongpassword123"
     }
-    user = UserCreate(**user_data)
-    assert user.email == user_data["email"]
-    assert user.name == user_data["name"]
-    assert user.password == user_data["password"]
-    assert user.status == UserStatus.ACTIVE
+    response = client.post("/api/users", json=payload)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["email"] == payload["email"]
+    assert data["name"] == payload["name"]
+    assert data["status"] == payload["status"]
+    assert "id" in data
+    assert "created_at" in data
+    assert "updated_at" in data
 
-def test_user_create_default_status():
-    """Test UserCreate with default status."""
-    user_data = {
+def test_create_user_invalid_email():
+    payload = {
+        "email": "not-an-email",
+        "name": "Test User",
+        "password": "strongpassword123"
+    }
+    response = client.post("/api/users", json=payload)
+    assert response.status_code == 422
+
+def test_create_user_short_password():
+    payload = {
         "email": "test@example.com",
         "name": "Test User",
-        "password": "password123"
+        "password": "short"
     }
-    user = UserCreate(**user_data)
-    assert user.status == UserStatus.ACTIVE
+    response = client.post("/api/users", json=payload)
+    assert response.status_code == 422
 
-def test_user_create_invalid_email():
-    """Test UserCreate with invalid email."""
-    with pytest.raises(ValidationError) as exc_info:
-        UserCreate(
-            email="invalid-email",
-            name="Test User",
-            password="password123"
-        )
-    assert "email" in str(exc_info.value)
+def test_get_user_success():
+    response = client.get("/api/users/123")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == "123"
+    assert "email" in data
+    assert "name" in data
 
-def test_user_create_short_password():
-    """Test UserCreate with short password."""
-    with pytest.raises(ValidationError) as exc_info:
-        UserCreate(
-            email="test@example.com",
-            name="Test User",
-            password="short"
-        )
-    assert "password" in str(exc_info.value)
-    assert "at least 8 characters" in str(exc_info.value)
+def test_get_user_not_found():
+    response = client.get("/api/users/999")
+    assert response.status_code == 404
+    data = response.json()
+    assert data["error"] == "HTTPException"
+    assert "User not found" in data["message"]
 
-def test_user_create_empty_name():
-    """Test UserCreate with empty name."""
-    with pytest.raises(ValidationError) as exc_info:
-        UserCreate(
-            email="test@example.com",
-            name="",
-            password="password123"
-        )
-    assert "name" in str(exc_info.value)
-    assert "at least 1 character" in str(exc_info.value)
+def test_update_user_success():
+    payload = {
+        "name": "Updated Name"
+    }
+    response = client.patch("/api/users/123", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == "123"
+    assert data["name"] == "Updated Name"
 
-def test_user_create_long_name():
-    """Test UserCreate with name exceeding max length."""
-    with pytest.raises(ValidationError) as exc_info:
-        UserCreate(
-            email="test@example.com",
-            name="a" * 101,
-            password="password123"
-        )
-    assert "name" in str(exc_info.value)
-    assert "at most 100 characters" in str(exc_info.value)
+def test_update_user_not_found():
+    payload = {
+        "name": "Updated Name"
+    }
+    response = client.patch("/api/users/999", json=payload)
+    assert response.status_code == 404
 
-def test_user_create_invalid_status():
-    """Test UserCreate with invalid status."""
-    with pytest.raises(ValidationError) as exc_info:
-        UserCreate(
-            email="test@example.com",
-            name="Test User",
-            password="password123",
-            status="invalid-status"
-        )
-    assert "status" in str(exc_info.value)
+def test_delete_user_success():
+    response = client.delete("/api/users/123")
+    assert response.status_code == 204
 
-def test_user_create_missing_fields():
-    """Test UserCreate with missing required fields."""
-    with pytest.raises(ValidationError) as exc_info:
-        UserCreate()
-
-    errors = str(exc_info.value)
-    assert "email" in errors
-    assert "name" in errors
-    assert "password" in errors
+def test_delete_user_not_found():
+    response = client.delete("/api/users/999")
+    assert response.status_code == 404
