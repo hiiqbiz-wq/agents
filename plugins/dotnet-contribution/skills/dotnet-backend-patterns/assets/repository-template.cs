@@ -279,13 +279,11 @@ public class EfCoreProductRepository : IProductRepository
 
     public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var product = await _context.Products.FindAsync(new object[] { id }, ct);
-        if (product != null)
-        {
-            product.IsDeleted = true;
-            product.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync(ct);
-        }
+        await _context.Products
+            .Where(p => p.Id == id)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(p => p.IsDeleted, true)
+                .SetProperty(p => p.UpdatedAt, DateTime.UtcNow), ct);
     }
 
     public async Task<IReadOnlyList<Product>> GetByIdsAsync(
